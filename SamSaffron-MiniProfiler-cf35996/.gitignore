@@ -1,0 +1,16 @@
+_ReSharper*
+bin
+obj
+*.suo
+*.sqlite
+*.user
+*.sdf
+*.nupkg
+nuget.exe
+Ruby/Gemfile.lock
+Ruby/*.gem
+*.*~
+*.swp
+.DS_Store
+tmp
+*~
