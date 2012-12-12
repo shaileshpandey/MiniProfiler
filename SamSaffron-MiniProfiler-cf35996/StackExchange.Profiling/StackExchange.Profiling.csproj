@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <DontImportPostSharp>True</DontImportPostSharp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PostSharp">
+      <HintPath>..\packages\PostSharp.2.1.7.26\lib\net20\PostSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -86,6 +90,7 @@
     <Compile Include="Helpers\SqlMapper.cs" />
     <Compile Include="Helpers\StackTraceSnippet.cs" />
     <Compile Include="Helpers\HaackFormatter.cs" />
+    <Compile Include="Instrument.cs" />
     <Compile Include="IpAddressProvider.cs">
       <DependentUpon>IUserProvider.cs</DependentUpon>
     </Compile>
@@ -104,6 +109,7 @@
     <Compile Include="MVCHelpers\ProfilingActionFilter.cs" />
     <Compile Include="MVCHelpers\ProfilingViewEngine.cs" />
     <Compile Include="MVCHelpers\WrappedView.cs" />
+    <Compile Include="RequiresPostSharp.cs" />
     <Compile Include="SqlFormatters\InlineFormatter.cs" />
     <Compile Include="SqlFormatters\ISqlFormatter.cs" />
     <Compile Include="SqlFormatters\OracleFormatter.cs" />
@@ -162,6 +168,7 @@
   <PropertyGroup>
     <PreBuildEvent>"$(ProjectDir)lib\dotless.Compiler.exe" -m "$(ProjectDir)UI\includes.less" "$(ProjectDir)UI\includes.css"</PreBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\PostSharp.2.1.7.26\tools\PostSharp.targets" Condition="Exists('..\packages\PostSharp.2.1.7.26\tools\PostSharp.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
