@@ -23,22 +23,21 @@ namespace SampleWeb.Controllers
             return Redirect("/");
         }
 
+      [Instrument]
         public ActionResult Index()
         {
-            var profiler = MiniProfiler.Current;
-
-            using (profiler.Step("Set page title"))
+            //using (profiler.Step("Set page title"))
             {
                 ViewBag.Title = "Home Page";
             }
 
-            using (profiler.Step("Doing complex stuff"))
+            //using (profiler.Step("Doing complex stuff"))
             {
-                using (profiler.Step("Step A"))
+                //using (profiler.Step("Step A"))
                 {
                     Thread.Sleep(100);
                 }
-                using (profiler.Step("Step B"))
+                //using (profiler.Step("Step B"))
                 {
                     Thread.Sleep(250);
                 }
