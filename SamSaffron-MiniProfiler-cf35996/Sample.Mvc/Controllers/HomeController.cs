@@ -9,6 +9,7 @@ using StackExchange.Profiling;
 
 namespace SampleWeb.Controllers
 {
+  [Instrument]
     public class HomeController : BaseController
     {
         public ActionResult EnableProfilingUI()
@@ -23,8 +24,7 @@ namespace SampleWeb.Controllers
             return Redirect("/");
         }
 
-      [Instrument]
-        public ActionResult Index()
+      [Ipublic ActionResult Index()
         {
             //using (profiler.Step("Set page title"))
             {
