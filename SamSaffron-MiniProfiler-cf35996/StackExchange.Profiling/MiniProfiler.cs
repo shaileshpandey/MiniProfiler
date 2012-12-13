@@ -64,28 +64,24 @@ namespace StackExchange.Profiling
                 _root = value;
 
                 // when being deserialized, we need to go through and set all child timings' parents
-                if (_root.HasChildren)
+              if (!_root.HasChildren) return;
+              var timings = new Stack<Timing>();
+
+              timings.Push(_root);
+
+              while (timings.Count > 0)
+              {
+                var timing = timings.Pop();
+
+                if (!timing.HasChildren) continue;
+                var children = timing.Children;
+
+                for (var i = children.Count - 1; i >= 0; i--)
                 {
-                    var timings = new Stack<Timing>();
-
-                    timings.Push(_root);
-
-                    while (timings.Count > 0)
-                    {
-                        var timing = timings.Pop();
-
-                        if (timing.HasChildren)
-                        {
-                            var children = timing.Children;
-
-                            for (int i = children.Count - 1; i >= 0; i--)
-                            {
-                                children[i].ParentTiming = timing;
-                                timings.Push(children[i]); // FLORIDA!  TODO: refactor this and other stack creation methods into one 
-                            }
-                        }
-                    }
+                  children[i].ParentTiming = timing;
+                  timings.Push(children[i]); // FLORIDA!  TODO: refactor this and other stack creation methods into one 
                 }
+              }
             }
         }
 
@@ -141,14 +137,7 @@ namespace StackExchange.Profiling
         public bool HasTrivialTimings
         {
             get
-            {
-                foreach (var t in GetTimingHierarchy())
-                {
-                    if (t.IsTrivial)
-                        return true;
-                }
-                return false;
-            }
+            { return GetTimingHierarchy().Any(t => t.IsTrivial); }
         }
 
         /// <summary>
@@ -157,14 +146,7 @@ namespace StackExchange.Profiling
         public bool HasAllTrivialTimings
         {
             get
-            {
-                foreach (var t in GetTimingHierarchy())
-                {
-                    if (!t.IsTrivial)
-                        return false;
-                }
-                return true;
-            }
+            { return GetTimingHierarchy().All(t => t.IsTrivial); }
         }
 
         /// <summary>
@@ -237,11 +219,10 @@ namespace StackExchange.Profiling
 
         internal IDisposable StepImpl(string name, ProfileLevel level = ProfileLevel.Info)
         {
-            if (level > this.Level) return null;
-            return new Timing(this, Head, name);
+          return level > this.Level ? null : new Timing(this, Head, name);
         }
 
-        internal bool StopImpl()
+      internal bool StopImpl()
         {
             if (!_sw.IsRunning)
                 return false;
@@ -275,11 +256,9 @@ namespace StackExchange.Profiling
 
                 yield return timing;
 
-                if (timing.HasChildren)
-                {
-                    var children = timing.Children;
-                    for (int i = children.Count - 1; i >= 0; i--) timings.Push(children[i]);
-                }
+              if (!timing.HasChildren) continue;
+              var children = timing.Children;
+              for (var i = children.Count - 1; i >= 0; i--) timings.Push(children[i]);
             }
         }
 
@@ -288,7 +267,7 @@ namespace StackExchange.Profiling
         /// </summary>
         internal decimal GetRoundedMilliseconds(long stopwatchElapsedTicks)
         {
-            long z = 10000 * stopwatchElapsedTicks;
+            var z = 10000 * stopwatchElapsedTicks;
             decimal msTimesTen = (int)(z / _sw.Frequency);
             return msTimesTen / 10;
         }
@@ -324,7 +303,7 @@ namespace StackExchange.Profiling
         /// <param name="level">This step's visibility level; allows filtering when <see cref="MiniProfiler.Start"/> is called.</param>
         public static IDisposable StepStatic(string name, ProfileLevel level = ProfileLevel.Info)
         {
-            return MiniProfilerExtensions.Step(Current, name, level);
+            return Current.Step(name, level);
         }
 
         /// <summary>
@@ -507,18 +486,16 @@ namespace StackExchange.Profiling
             var text = new StringBuilder()
                 .Append(HttpUtility.HtmlEncode(Environment.MachineName)).Append(" at ").Append(DateTime.UtcNow).AppendLine();
 
-            Stack<Timing> timings = new Stack<Timing>();
+            var timings = new Stack<Timing>();
             timings.Push(profiler.Root);
             while (timings.Count > 0)
             {
                 var timing = timings.Pop();
-                string name = HttpUtility.HtmlEncode(timing.Name);
+                var name = HttpUtility.HtmlEncode(timing.Name);
                 text.AppendFormat("{2} {0} = {1:###,##0.##}ms", name, timing.DurationMilliseconds, new string('>', timing.Depth)).AppendLine();
-                if (timing.HasChildren)
-                {
-                    IList<Timing> children = timing.Children;
-                    for (int i = children.Count - 1; i >= 0; i--) timings.Push(children[i]);
-                }
+              if (!timing.HasChildren) continue;
+              IList<Timing> children = timing.Children;
+              for (var i = children.Count - 1; i >= 0; i--) timings.Push(children[i]);
             }
             return new HtmlString(text.ToString());
         }

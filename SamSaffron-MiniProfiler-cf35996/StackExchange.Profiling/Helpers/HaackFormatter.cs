@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Web.UI;
@@ -168,7 +169,7 @@ namespace StackExchange.Profiling.Helpers
                         return (DataBinder.Eval(o, Expression) ?? string.Empty).ToString();
                     }
                     return (DataBinder.Eval(o, Expression, "{0:" + Format + "}") ??
-                      string.Empty).ToString();
+                      string.Empty).ToString(CultureInfo.InvariantCulture);
                 }
                 catch (ArgumentException)
                 {

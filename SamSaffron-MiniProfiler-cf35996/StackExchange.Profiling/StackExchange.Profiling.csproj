@@ -92,7 +92,7 @@
     <Compile Include="Helpers\HaackFormatter.cs" />
     <Compile Include="Instrument.cs" />
     <Compile Include="IpAddressProvider.cs">
-      <DependentUpon>IUserProvider.cs</DependentUpon>
+      <DependentUpon>IUserProvider.cs</AttributeDependentUpon>
     </Compile>
     <Compile Include="IProfilerProvider.cs" />
     <Compile Include="IUserProvider.cs">

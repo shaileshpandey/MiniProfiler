@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Data.SqlClient;
 using System.Data.Common;
-
+using System.Data.SqlClient;
+using System.Linq;
 using StackExchange.Profiling.Helpers;
 using StackExchange.Profiling.Helpers.Dapper;
-using System.Runtime.Serialization;
 
 namespace StackExchange.Profiling.Storage
 {

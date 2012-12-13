@@ -10,11 +10,13 @@ using Dapper;
 
 namespace SampleWeb.Controllers
 {
+    [Instrument(InsrumentationOption.Skip, AttributeReplace = true)]
     public abstract class BaseController : Controller
     {
         /// <summary>
         /// Returns an open connection that will have its queries profiled.
         /// </summary>
+        [Instrument(InsrumentationOption.Required, AttributeReplace = true)]
         public static DbConnection GetConnection(MiniProfiler profiler = null)
         {
             using (profiler.Step("GetOpenConnection"))
@@ -62,7 +64,7 @@ namespace SampleWeb.Controllers
             base.OnResultExecuted(filterContext);
         }
 
-
+      [Instrument(InsrumentationOption.Required, AttributeReplace = true)]
         private void UpsertRouteHit(ActionDescriptor actionDesc, MiniProfiler profiler)
         {
             var routeName = actionDesc.ControllerDescriptor.ControllerName + "/" + actionDesc.ActionName;

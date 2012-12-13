@@ -9,18 +9,17 @@ using StackExchange.Profiling;
 
 namespace SampleWeb.Controllers
 {
-  [Instrument]
     public class HomeController : BaseController
     {
         public ActionResult EnableProfilingUI()
         {
-            SampleWeb.MvcApplication.DisableProfilingResults = false;
+            MvcApplication.DisableProfilingResults = false;
             return Redirect("/");
         }
 
         public ActionResult DisableProfilingUI() 
         {
-            SampleWeb.MvcApplication.DisableProfilingResults = true;
+            MvcApplication.DisableProfilingResults = true;
             return Redirect("/");
         }
 
@@ -35,7 +34,7 @@ namespace SampleWeb.Controllers
             {
                 //using (profiler.Step("Step A"))
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(100););
                 }
                 //using (profiler.Step("Step B"))
                 {
@@ -46,20 +45,18 @@ namespace SampleWeb.Controllers
             return View();
         }
 
-        public ActionResult About()
-        {
-            // prevent this specific route from being profiled
-            MiniProfiler.Stop(discardResults: true);
-
-            return View();
-        }
-
-        public ActionResult ResultsAuthorization()
+        [Instrument(InsrumentationOption.NotNeeded, AttributeReplace = true)]
+        public ActionResult About
         {
             return View();
         }
 
-        public ActionResult FetchRouteHits()
+        public ActionResult EFResultsAuthorization
+        {
+            return View();
+        }
+
+        public ActionResult EFtchRouteHits()
         {
             var profiler = MiniProfiler.Current;
 

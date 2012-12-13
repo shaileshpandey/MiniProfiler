@@ -1,11 +1,9 @@
 ﻿#if ASP_NET_MVC3
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Web.Mvc;
 using System.Web;
+using System.Web.Mvc;
 
 namespace StackExchange.Profiling.MVCHelpers
 {
@@ -46,7 +44,7 @@ namespace StackExchange.Profiling.MVCHelpers
             {
                 found = new ViewEngineResult(new WrappedView(found.View, name, isPartial: isPartial), this);
 
-                if (found != null && block != null)
+                if (block != null)
                 {
                     block.Dispose();
                     HttpContext.Current.Items[key] = null;

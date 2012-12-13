@@ -1,20 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-
-using StackExchange.Profiling;
-using System.IO;
-using SampleWeb.Controllers;
-using Dapper;
-using StackExchange.Profiling.Storage;
 using SampleWeb.Helpers;
-using System.Data.SqlServerCe;
-using SampleWeb.EFCodeFirst;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity;
+using StackExchange.Profiling;
 using StackExchange.Profiling.MVCHelpers;
 
 namespace SampleWeb
@@ -63,7 +53,7 @@ namespace SampleWeb
             ViewEngines.Engines.Clear();
             foreach (var item in copy)
             {
-                ViewEngines.Engines.Add(new ProfilingViewEngine(item));
+              ViewEngines.Engines.Add(new ProfilingViewEngine(item));
             }
 
             MiniProfilerEF.Initialize(false);
@@ -78,10 +68,10 @@ namespace SampleWeb
             // the user, or similar; this could also all be done in action filters, but this
             // is simple and practical; just return null for most users. For our test, we'll
             // profile only for local requests (seems reasonable)
-            if (Request.IsLocal)
-            {
-                profiler = StackExchange.Profiling.MiniProfiler.Start();
-            }
+            //if (Request.IsLocal)
+            //{
+            //  profiler = MiniProfiler.Start();
+            //}
 
             using (profiler.Step("Application_BeginRequest"))
             {
@@ -91,7 +81,7 @@ namespace SampleWeb
 
         protected void Application_EndRequest()
         {
-            StackExchange.Profiling.MiniProfiler.Stop();
+            MiniProfiler.Stop();
         }
 
 
