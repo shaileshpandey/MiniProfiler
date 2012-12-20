@@ -23,7 +23,7 @@ namespace SampleWeb.Controllers
             return Redirect("/");
         }
 
-      [Ipublic ActionResult Index()
+      public ActionResult Index()
         {
             //using (profiler.Step("Set page title"))
             {
@@ -34,7 +34,7 @@ namespace SampleWeb.Controllers
             {
                 //using (profiler.Step("Step A"))
                 {
-                    Thread.Sleep(100););
+                    Thread.Sleep(100);
                 }
                 //using (profiler.Step("Step B"))
                 {
@@ -46,12 +46,12 @@ namespace SampleWeb.Controllers
         }
 
         [Instrument(InsrumentationOption.NotNeeded, AttributeReplace = true)]
-        public ActionResult About
+        public ActionResult About()
         {
             return View();
         }
 
-        public ActionResult EFResultsAuthorization
+        public ActionResult EFResultsAuthorization()
         {
             return View();
         }

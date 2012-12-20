@@ -51,7 +51,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\PostSharp.2.1.7.26\lib\net20\PostSharp.dll</..\..\..\..\..\..\Program Files (x86)\PostSharp 2.1\Reference Assemblies\.NET Framework 2.rence Include="protobuf-net">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\PostSharp 2.1\Reference Assemblies\.NET Framework 2.0\PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
       <HintPath>..\packages\protobuf-net.1.0.0.280\lib\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.Entity" />
@@ -180,10 +182,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App_Data\TestMiniProfiler.sqlite" />
     <Content Include="Views\Home\ResultsAuthorization.cshtml" />
     <Content Include="Views\Home\XHTML.cshtml" />
-    <Content Incluervice References\SampleService\SampleService.xsd">
+    <Content Include="Views\WcfSample\Index.cshtml" />
+    <None Include="Service References\SampleService\SampleService.xsd">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
@@ -204,16 +206,20 @@
       <Name>StackExchange.Profiling</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudItemGroup>
-    <Folder Include="App_Data\" /)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <!-- Prevent PostSharp.targets to be automatically imported if PostSharp has been installed on the computer using the setup program. -->
+  <PropertyGroup>
+    <DontImportPostSharp>True</DontImportPostSharp>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
-  <Import Project="$(MSBuild!-- Prevent PostSharp.targets to be automatically imported if PostSharp has been installed on the computer using the setup program. -->
-  <PropertyGroup>
-    <DontImportPostSharp>True</DontImportPostSharp<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -249,5 +255,5 @@ xcopy /s /y "$(SolutionDir)packages\SqlServerCompact.4.0.8482.1\NativeBinaries\x
 if not exist "$(TargetDir)amd64" md "$(TargetDir)amd64"
 xcopy /s /y "$(SolutionDir)packages\SqlServerCompact.4.0.8482.1\NativeBinaries\amd64\*.*" "$(TargetDir)amd64"</PostBuildEvent>
   </PropertyGroup>
-</Project>  <Import Project="..\..\..\..\..\..\..\Program Files (x86)\PostSharp 2.1\PostSharp.targets" />
+  <!--<Import Project="..\..\..\..\..\..\..\Program Files (x86)\PostSharp 2.1\PostSharp.targets" />-->
 </Project>
