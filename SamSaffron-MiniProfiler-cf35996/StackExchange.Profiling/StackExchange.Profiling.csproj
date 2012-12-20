@@ -106,6 +106,7 @@
     </Compile>
     <Compile Include="MiniProfiler.cs" />
     <Compile Include="ClientTimingHelper.cs" />
+	  >
     <Compile Include="MVCHelpers\ProfilingActionFilter.cs" />
     <Compile Include="MVCHelpers\ProfilingViewEngine.cs" />
     <Compile Include="MVCHelpers\WrappedView.cs" />
