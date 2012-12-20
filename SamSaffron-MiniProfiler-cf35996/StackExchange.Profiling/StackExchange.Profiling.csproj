@@ -92,7 +92,7 @@
     <Compile Include="Helpers\HaackFormatter.cs" />
     <Compile Include="Instrument.cs" />
     <Compile Include="IpAddressProvider.cs">
-      <DependentUpon>IUserProvider.cs</AttributeDependentUpon>
+      <DependentUpon>IUserProvider.cs</DependentUpon>
     </Compile>
     <Compile Include="IProfilerProvider.cs" />
     <Compile Include="IUserProvider.cs">
@@ -106,7 +106,7 @@
     </Compile>
     <Compile Include="MiniProfiler.cs" />
     <Compile Include="ClientTimingHelper.cs" />
-	  >
+	  
     <Compile Include="MVCHelpers\ProfilingActionFilter.cs" />
     <Compile Include="MVCHelpers\ProfilingViewEngine.cs" />
     <Compile Include="MVCHelpers\WrappedView.cs" />
