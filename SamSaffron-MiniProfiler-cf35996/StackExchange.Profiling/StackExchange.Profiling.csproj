@@ -45,8 +45,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="PostSharp">
-      <HintPath>..\packages\PostSharp.2.1.7.26\lib\net20\PostSharp.dll</HintPath>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>..\packages\PostSharp.2.1.7.28\lib\net20\PostSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -133,8 +133,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="miniprofiler.snk" />
-    <None Include="packages.config" />
     <EmbeddedResource Include="UI\include.partial.html" />
+    <None Include="packages.config" />
     <None Include="UI\includes.less" />
     <EmbeddedResource Include="UI\list.tmpl" />
   </ItemGroup>
@@ -168,7 +168,7 @@
   <PropertyGroup>
     <PreBuildEvent>"$(ProjectDir)lib\dotless.Compiler.exe" -m "$(ProjectDir)UI\includes.less" "$(ProjectDir)UI\includes.css"</PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\PostSharp.2.1.7.26\tools\PostSharp.targets" Condition="Exists('..\packages\PostSharp.2.1.7.26\tools\PostSharp.targets')" />
+  <Import Project="..\packages\PostSharp.2.1.7.28\tools\PostSharp.targets" Condition="Exists('..\packages\PostSharp.2.1.7.28\tools\PostSharp.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
