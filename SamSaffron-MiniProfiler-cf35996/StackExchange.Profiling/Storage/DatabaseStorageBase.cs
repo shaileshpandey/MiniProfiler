@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.Common;
+using System.IO;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.XPath;
 
 namespace StackExchange.Profiling.Storage
 {
@@ -116,12 +120,48 @@ namespace StackExchange.Profiling.Storage
                 }
                 stack.Push(cur);
             }
-
+            SaveTimings(stack);
             result.ClientTimings = clientTimings;
 
             // TODO: .Root does all the above work again, but it's used after [DataContract] deserialization; refactor it out somehow
             result.Root = timings.First();
         }
 
+        protected void SaveTimings(Stack<Timing> timings)
+        {
+            List<SavedTimings> savedTimings = new List<SavedTimings>();
+
+            foreach (Timing t in timings)
+                if (t.HasChildren)
+                    for (int child = 0; child <= t.Children.Count-1;child++ )
+                        savedTimings.Add(new SavedTimings() { 
+                            Step = t.Children[child].Name, 
+                            Duration = t.Children[child].DurationMilliseconds 
+                        //IsSQLTiming=t.Children[child].HasSqlTimings,
+                        //SQLDuration=t.Children[child].SqlTimings
+                        });
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<SavedTimings>));
+
+            string[] tmpfile = timings.First(e => e.IsRoot).Name.Split('/');
+            string file = tmpfile[tmpfile.Length - 1].ToString();
+
+            string path = String.Format(@"C:\{0}_timing.xml", file);
+ 
+            TextWriter textWriter = new StreamWriter(path);
+
+           // foreach (Timing t in timings)
+            serializer.Serialize(textWriter, savedTimings);
+            
+            textWriter.Close();
+        }
+
+        public class SavedTimings
+        {
+            public string Step { get; set; }
+            public decimal? Duration { get; set; }
+            //public bool IsSQLTiming { get; set; }
+            //public decimal? SQLDuration { get; set; }
+        }
     }
 }
