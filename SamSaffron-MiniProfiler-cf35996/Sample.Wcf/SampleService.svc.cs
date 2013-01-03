@@ -14,6 +14,7 @@ using Dapper;
 namespace Sample.Wcf
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in code, svc and config file together.
+    [Instrument(InsrumentationOption.Skip, AttributeReplace = true)]
     public class SampleService : ISampleService
     {
 
@@ -61,6 +62,8 @@ namespace Sample.Wcf
 
             return "Result";
         }
+
+        [Instrument(InsrumentationOption.Skip, AttributeReplace = true)]
         public string MassiveNesting()
         {
             var i = 0;
@@ -94,6 +97,7 @@ namespace Sample.Wcf
             }
         }
 
+        [Instrument(InsrumentationOption.Required, AttributeReplace = true)]
         private void RecursiveMethod(ref int i, DbConnection conn, MiniProfiler profiler)
         {
             Thread.Sleep(5); // ensure we show up in the profiler
