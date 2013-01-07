@@ -82,7 +82,7 @@ var MiniProfiler = (function () {
                 }
                 mPt.flush();
             }
-            
+
             if (id == options.currentId) {
 
                 clientPerformance = getClientPerformance();
@@ -92,7 +92,7 @@ var MiniProfiler = (function () {
                     var copy = { navigation: {}, timing: {} };
 
                     var timing = $.extend({}, clientPerformance.timing);
-                    
+
                     for (p in timing) {
                         if (timing.hasOwnProperty(p) && !$.isFunction(timing[p])) {
                             copy.timing[p] = timing[p];
@@ -105,18 +105,18 @@ var MiniProfiler = (function () {
 
                     // hack to add chrome timings 
                     if (window.chrome && window.chrome.loadTimes) {
-                      var chromeTimes = window.chrome.loadTimes(); 
-                      if (chromeTimes.firstPaintTime) {
-                        clientPerformance.timing["First Paint Time"] = Math.round(chromeTimes.firstPaintTime * 1000);
-                      }
-                      if (chromeTimes.firstPaintTime) {
-                        clientPerformance.timing["First Paint After Load Time"] = Math.round(chromeTimes.firstPaintAfterLoadTime * 1000);
-                      }
+                        var chromeTimes = window.chrome.loadTimes();
+                        if (chromeTimes.firstPaintTime) {
+                            clientPerformance.timing["First Paint Time"] = Math.round(chromeTimes.firstPaintTime * 1000);
+                        }
+                        if (chromeTimes.firstPaintTime) {
+                            clientPerformance.timing["First Paint After Load Time"] = Math.round(chromeTimes.firstPaintAfterLoadTime * 1000);
+                        }
 
                     }
                 }
             } else if (ajaxStartTime != null && clientProbes && clientProbes.length > 0) {
-                clientPerformance = { timing: { navigationStart: ajaxStartTime.getTime() } };
+                clientPerformance = { timing: { navigationStart: ajaxStartTime.getTime()} };
                 ajaxStartTime = null;
             }
 
@@ -144,6 +144,10 @@ var MiniProfiler = (function () {
 
     var renderTemplate = function (json) {
         return $('#profilerTemplate').tmpl(json);
+    };
+
+    var comparisonTemplate = function (json) {
+        return $('#comparisonTemplate').tmpl(json);
     };
 
     var buttonShow = function (json) {
@@ -176,6 +180,9 @@ var MiniProfiler = (function () {
         var trivial = popup.find('.profiler-toggle-trivial');
         var childrenTime = popup.find('.profiler-toggle-duration-with-children');
         var trivialGaps = popup.parent().find('.profiler-toggle-trivial-gaps');
+        var compareReport = popup.find('#compare-profile-result');
+        var saveReport = popup.find('#save-profile-result');
+
 
         var toggleIt = function (node) {
             var link = $(node),
@@ -190,6 +197,46 @@ var MiniProfiler = (function () {
 
         childrenTime.add(trivial).add(trivialGaps).click(function () {
             toggleIt(this);
+        });
+
+        saveReport.click(function () {
+            //save-result
+            $.ajax({
+                url: options.path + 'save-result',
+                data: 0, //{ id: id, clientPerformance: clientPerformance, clientProbes: clientProbes, popup: 1 },
+                dataType: 'json',
+                type: 'POST',
+                success: function (json) {
+                    fetchedIds.push(id);
+                    if (json != "hidden") {
+                        buttonShow(json);
+                    }
+                },
+                complete: function () {
+                    fetchingIds.splice(idx, 1);
+                }
+            });
+
+        });
+
+        compareReport.click(function () {
+            //compare-result
+            $.ajax({
+                url: options.path + 'compare-result',
+                data: 0, //{ id: id, clientPerformance: clientPerformance, clientProbes: clientProbes, popup: 1 },
+                dataType: 'json',
+                type: 'POST',
+                success: function (json) {
+                    fetchedIds.push(id);
+                    if (json != "hidden") {
+                        buttonShow(json);
+                    }
+                },
+                complete: function () {
+                    fetchingIds.splice(idx, 1);
+                }
+            });
+
         });
 
         // if option is set or all our timings are trivial, go ahead and show them
@@ -367,6 +414,43 @@ var MiniProfiler = (function () {
         });
     };
 
+    var ShowComparison = function () {
+        var comparisonChart = $('.profiler-comparison-full');
+//        comparisonChart.append('<table>');
+//        for (var i = 0; i < profiler.length; i++) {
+//            comparisonChart.append('<th><td colspan=2>' + profiler[i].Key + '</td></th>');
+//            for (var j = 0; j < profiler[i].SavedTimings.length; j++) {
+//                comparisonChart.append('<tr><td>' + profiler[i].SavedTimings[j].Step + '</td></tr>');
+//                comparisonChart.append('<tr><td>' + profiler[i].SavedTimings[j].Duration + '</td></tr>');
+//            }
+//        }
+//        comparisonChart.append('</table>');
+//        comparisonChart.show();
+//        alert(comparisonChart.text);
+
+        // first, get jquery tmpl, then render and bind handlers
+        fetchTemplates(function () {
+
+            //alert(profiler.Step);
+            // profiler will be defined in the full page's head
+            comparisonTemplate(profiler).appendTo(comparisonChart);
+
+            //alert(profiler.Step);
+            //alert(container.toString);
+
+            var popup = $('.profiler-popup');
+
+            //toggleHidden(popup);
+
+            //prettyPrint();
+
+            // since queries are already shown, just highlight and scroll when clicking a "1 sql" link
+            //                    popup.find('.profiler-queries-show').click(function () {
+            //                        queriesScrollIntoView($(this), $('.profiler-queries'), $(document));
+            //                    });
+        });
+    };
+
     var initFullView = function () {
 
         // first, get jquery tmpl, then render and bind handlers
@@ -374,6 +458,9 @@ var MiniProfiler = (function () {
 
             // profiler will be defined in the full page's head
             renderTemplate(profiler).appendTo(container);
+
+            //            alert(profiler.Step);
+            //            alert(container.toString);
 
             var popup = $('.profiler-popup');
 
@@ -457,7 +544,7 @@ var MiniProfiler = (function () {
 
         if (jQuery && jQuery(document).ajaxStart)
             jQuery(document).ajaxStart(function () { ajaxStartTime = new Date(); });
-        
+
         // fetch results after ASP Ajax calls
         if (typeof (Sys) != 'undefined' && typeof (Sys.WebForms) != 'undefined' && typeof (Sys.WebForms.PageRequestManager) != 'undefined') {
             // Get the instance of PageRequestManager.
@@ -499,7 +586,7 @@ var MiniProfiler = (function () {
         // also fetch results after ExtJS requests, in case it is being used
         if (typeof (Ext) != 'undefined' && typeof (Ext.Ajax) != 'undefined' && typeof (Ext.Ajax.on) != 'undefined') {
             // Ext.Ajax is a singleton, so we just have to attach to its 'requestcomplete' event
-            Ext.Ajax.on('requestcomplete', function(e, xhr, settings) {
+            Ext.Ajax.on('requestcomplete', function (e, xhr, settings) {
                 var stringIds = xhr.getResponseHeader('X-MiniProfiler-Ids');
                 if (stringIds) {
                     var ids = typeof JSON != 'undefined' ? JSON.parse(stringIds) : eval(stringIds);
@@ -525,7 +612,7 @@ var MiniProfiler = (function () {
                 var currentId = script.getAttribute('data-current-id');
 
                 var ids = script.getAttribute('data-ids');
-                if (ids)  ids = ids.split(',');
+                if (ids) ids = ids.split(',');
 
                 var position = script.getAttribute('data-position');
 
@@ -554,15 +641,21 @@ var MiniProfiler = (function () {
             var doInit = function () {
                 // when rendering a shared, full page, this div will exist
                 container = $('.profiler-result-full');
-
+                var comparisonChart = $('.profiler-comparison-full');
                 if (container.length) {
                     if (window.location.href.indexOf("&trivial=1") > 0) {
                         options.showTrivial = true
                     }
+                    //alert('got');
                     initFullView();
                 }
                 else {
                     initPopupView();
+                }
+
+                if (comparisonChart.length) {
+                    alert('ooo');
+                    ShowComparison();
                 }
             };
 
@@ -583,7 +676,7 @@ var MiniProfiler = (function () {
 
             var wait = 0;
             var finish = false;
-            var deferInit = function() {
+            var deferInit = function () {
                 if (finish) return;
                 if (window.performance && window.performance.timing && window.performance.timing.loadEventEnd == 0 && wait < 10000) {
                     setTimeout(deferInit, 100);
@@ -594,7 +687,7 @@ var MiniProfiler = (function () {
                 }
             };
 
-            var init = function() {
+            var init = function () {
                 if (options.authorized) {
                     var url = options.path + "includes.css?v=" + options.version;
                     if (document.createStyleSheet) {
@@ -613,14 +706,14 @@ var MiniProfiler = (function () {
                 }
             }
 
-            if (typeof(jQuery) == 'function') {
+            if (typeof (jQuery) == 'function') {
                 var jQueryVersion = jQuery.fn.jquery.split('.');
             }
             if (jQueryVersion && parseInt(jQueryVersion[0]) < 2 && parseInt(jQueryVersion[1]) >= 7) {
                 MiniProfiler.jQuery = $ = jQuery;
                 $(deferInit);
             } else {
-                load(options.path + "jquery.1.7.1.js?v=" + options.version, function() {
+                load(options.path + "jquery.1.7.1.js?v=" + options.version, function () {
                     MiniProfiler.jQuery = $ = jQuery.noConflict(true);
                     $(deferInit);
                 });
@@ -665,10 +758,14 @@ var MiniProfiler = (function () {
             return options.path + 'results?id=' + id;
         },
 
+        compareUrl: function (id) {
+            return options.path + 'compare-result?id=' + id;
+        },
+
         getClientTimings: function (clientTimings) {
             var list = [];
             var t;
-            
+
             if (!clientTimings.Timings) return [];
 
             for (var i = 0; i < clientTimings.Timings.length; i++) {

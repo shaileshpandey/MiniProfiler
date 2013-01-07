@@ -56,6 +56,14 @@
               </td>
             {{/each}}
             </tr>
+            <tr>
+              <td colspant="3">
+              <a id="save-profile-result" title="save profile result">save result</a>
+              </td>
+                <td colspant="4">
+                <a id="compare-profile-result" href="${MiniProfiler.shareUrl(Id)}" title="compare saved results">compare saved results</a>
+              </td>
+            </tr>
           </tfoot>
         </table>
         {{if ClientTimings}}
@@ -128,6 +136,8 @@
     show trivial
   </a>
   {{/if}}
+  <a href="${MiniProfiler.compareUrl(Id)}" class="profiler-compare-profiler-results" target="_blank">compare my results</a>
+
 </script>
 
 <script id="timingTemplate" type="text/x-jquery-tmpl">
@@ -216,4 +226,25 @@
     </td>
   </tr>
 
+</script>
+
+<script id="comparisonTemplate" type="text/x-jquery-tmpl">
+  <div class="profiler-result">
+    <div class="profiler-popup">
+      <div class="profiler-output">
+        <table class="profiler-timings profiler-client-timings">
+          <tbody>
+            {{each SavedTimings}}
+            <tr>
+              <td class="profiler-label">${Step}</td>
+              <td class="profiler-duration">
+                <span class="profiler-unit"></span>${Duration}
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </script>

@@ -8,6 +8,7 @@ using System.Linq;
 using StackExchange.Profiling.Helpers;
 using System.Text;
 using System.Collections.Concurrent;
+using StackExchange.Profiling.Storage;
 
 namespace StackExchange.Profiling.UI
 {
@@ -58,6 +59,53 @@ namespace StackExchange.Profiling.UI
                     useExistingjQuery = useExistingjQuery ?? MiniProfiler.Settings.UseExistingjQuery ? "true" : "false"
                 });
                 
+            }
+
+            return new HtmlString(result);
+        }
+
+        internal static HtmlString RenderIncludes(List<ReportAnalyser.SavedTimingsData> profiler, RenderPosition? position = null, bool? showTrivial = null, bool? showTimeWithChildren = null, int? maxTracesToShow = null, bool? showControls = null, bool? useExistingjQuery = null)
+        {
+            string format = GetResource("include.partial.html");
+            Guid id = Guid.NewGuid();
+            var result = "";
+
+            if (profiler != null)
+            {
+                // HACK: unviewed ids are added to this list during Storage.Save, but we know we haven't see the current one yet,
+                // so go ahead and add it to the end - it's usually the only id, but if there was a redirect somewhere, it'll be there, too
+                MiniProfiler.Settings.EnsureStorageStrategy();
+
+                var authorized =
+                    MiniProfiler.Settings.Results_Authorize == null ||
+                    MiniProfiler.Settings.Results_Authorize(HttpContext.Current.Request);
+
+                List<Guid> ids;
+                if (authorized)
+                {
+                    ids = MiniProfiler.Settings.Storage.GetUnviewedIds(null);
+                    ids.Add(id);
+                }
+                else
+                {
+                    ids = new List<Guid> { id };
+                }
+
+                result = format.Format(new
+                {
+                    path = VirtualPathUtility.ToAbsolute(MiniProfiler.Settings.RouteBasePath).EnsureTrailingSlash(),
+                    version = MiniProfiler.Settings.Version,
+                    ids = ids.ToJson(),
+                    position = (position ?? MiniProfiler.Settings.PopupRenderPosition).ToString().ToLower(),
+                    showTrivial = "true",//showTrivial ?? MiniProfiler.Settings.PopupShowTrivial ? "true" : "false",
+                    showChildren = "true",//showTimeWithChildren ?? MiniProfiler.Settings.PopupShowTimeWithChildren ? "true" : "false",
+                    maxTracesToShow = maxTracesToShow ?? MiniProfiler.Settings.PopupMaxTracesToShow,
+                    showControls = "true",//showControls ?? MiniProfiler.Settings.ShowControls ? "true" : "false",
+                    currentId = id,
+                    authorized = authorized ? "true" : "false",
+                    useExistingjQuery = useExistingjQuery ?? MiniProfiler.Settings.UseExistingjQuery ? "true" : "false"
+                });
+
             }
 
             return new HtmlString(result);
@@ -132,12 +180,41 @@ namespace StackExchange.Profiling.UI
                     output = Results(context);
                     break;
 
+                case "compare-result":
+                    output = CompareReport(context);
+                    break;
+
+                case "save-result":
+                        output = SaveReport(context);
+                    break;
+
                 default:
                     output = NotFound(context);
                     break;
             }
 
             context.Response.Write(output);
+        }
+
+        private static string SaveReport(HttpContext context)
+        {
+            Results(context, true);
+            return "saved";
+        }
+
+        private static string CompareReport(HttpContext context)
+        {
+            string ret=string.Empty;
+            Guid id = MiniProfiler.Settings.Storage.List(1).FirstOrDefault();
+            MiniProfiler profiler = MiniProfiler.Settings.Storage.Load(id);
+
+            if (profiler != null)
+            {
+                List<ReportAnalyser.SavedTimingsData> data = ReportAnalyser.CompareTimings(profiler.Root);
+               ret= CompareResultPage(context, data);
+            }
+
+            return ret;
         }
 
         private static string ResultList(HttpContext context)
@@ -253,10 +330,11 @@ namespace StackExchange.Profiling.UI
             return GetResource(embeddedFile);
         }
 
+
         /// <summary>
         /// Handles rendering a previous MiniProfiler session, identified by its "?id=GUID" on the query.
         /// </summary>
-        private static string Results(HttpContext context)
+        private static string Results(HttpContext context, bool saveReport=false)
         {
             // when we're rendering as a button/popup in the corner, we'll pass ?popup=1
             // if it's absent, we're rendering results as a full page for sharing
@@ -317,6 +395,9 @@ namespace StackExchange.Profiling.UI
                 return "hidden".ToJson();
             }
 
+            if (saveReport)
+                ReportAnalyser.SaveCurrentTimings(profiler.Root);
+
             return isPopup ? ResultsJson(context, profiler) : ResultsFullPage(context, profiler);
         }
 
@@ -357,6 +438,55 @@ namespace StackExchange.Profiling.UI
                 version = MiniProfiler.Settings.Version
             });
         }
+
+        private static string CompareResultPage(HttpContext context, List<ReportAnalyser.SavedTimingsData> savedTimingsData)
+        {
+            context.Response.ContentType = "text/html";
+
+            var template = GetResource("ComparisonReport.htm");
+
+            return template.Format(new
+            {
+                name = "Report Comparison",
+                duration = 0,
+                path = VirtualPathUtility.ToAbsolute(MiniProfiler.Settings.RouteBasePath).EnsureTrailingSlash(),
+                json = MiniProfiler.ToJson(savedTimingsData),
+                includes = RenderIncludes(savedTimingsData),
+                version = MiniProfiler.Settings.Version
+            });
+
+            //StringBuilder htmlOutput= new StringBuilder();
+            //if (savedTimingsData != null)
+            //{
+            //    foreach (ReportAnalyser.SavedTimingsData timings in savedTimingsData)
+            //        htmlOutput.Append(Parse(context, timings));
+            //}
+            //return htmlOutput.ToString();
+        }
+
+        //private static string Parse(HttpContext context, ReportAnalyser.SavedTimingsData savedTimingData)
+        //{
+        //    StringBuilder htmlOutput = new StringBuilder();
+
+        //    foreach (ReportAnalyser.SavedTimings timings in savedTimingData.SavedTimings)
+        //        htmlOutput.Append(ParseData(timings));
+        //    return htmlOutput.ToString();
+        //}
+
+        //private static string ParseData(ReportAnalyser.SavedTimings savedTiming)
+        //{
+        //    var template = GetResource("ComparisonReport.htm");
+
+        //    return template.Format(new
+        //    {
+        //        name = savedTiming.Step,
+        //        duration = savedTiming.Duration.ToString(),
+        //        path = VirtualPathUtility.ToAbsolute(MiniProfiler.Settings.RouteBasePath).EnsureTrailingSlash(),
+        //        json = MiniProfiler.ToJson(savedTiming),
+        //        //includes = RenderIncludes(savedTiming),
+        //        version = MiniProfiler.Settings.Version
+        //    });
+        //}
 
         private static bool bypassLocalLoad = false; 
         private static string GetResource(string filename)

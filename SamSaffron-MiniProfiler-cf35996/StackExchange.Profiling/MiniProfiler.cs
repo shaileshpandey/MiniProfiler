@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Routing;
 using System.Web.Script.Serialization;
 using StackExchange.Profiling.Helpers;
+using StackExchange.Profiling.Storage;
 
 namespace StackExchange.Profiling
 {
@@ -350,6 +351,14 @@ namespace StackExchange.Profiling
             if (profiler == null) return null;
 
             var result = new JavaScriptSerializer { MaxJsonLength = MiniProfiler.Settings.MaxJsonResponseSize }.Serialize(profiler);
+            return result;
+        }
+
+        public static string ToJson(List<ReportAnalyser.SavedTimingsData> savedTimings)
+        {
+            if (savedTimings == null) return null;
+
+            var result = new JavaScriptSerializer { MaxJsonLength = MiniProfiler.Settings.MaxJsonResponseSize }.Serialize(savedTimings);
             return result;
         }
 
